@@ -27,152 +27,194 @@
 //
 //  Updated to support text, image, or both as tabs
 //
-
+//
+//  SlidingTabView.swift
+//
+//  Copyright (c) …
 import SwiftUI
 
 @available(iOS 13.0, *)
 public enum TabItem: Hashable {
     case text(String)
-    case image(String)          // system image name
+    case image(String)          // system image or asset image
     case textAndImage(String, String)
-    
+
+    // MARK: - Asset detection (cross-platform)
+    private func assetExists(named name: String) -> Bool {
+        #if canImport(UIKit)
+        if UIImage(named: name) != nil { return true }
+        #elseif canImport(AppKit)
+        if NSImage(named: name) != nil { return true }
+        #endif
+
+        // Fallback: look for files in bundle that match this name
+        let exts = ["png", "jpg", "jpeg", "pdf"]
+        let bundle = Bundle.main
+
+        return exts.contains { ext in
+            bundle.url(forResource: name, withExtension: ext) != nil
+        }
+    }
+
+    // MARK: - Label rendering
     @ViewBuilder
     var label: some View {
         switch self {
+
         case .text(let title):
             Text(title)
-        case .image(let systemName):
-            Image(systemName: systemName)
-        case .textAndImage(let title, let systemName):
+
+        case .image(let name):
+            if assetExists(named: name) {
+                Image(name)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 20)
+            } else {
+                Image(systemName: name)
+            }
+
+        case .textAndImage(let title, let name):
             HStack(spacing: 4) {
-                Image(systemName: systemName)
+                if assetExists(named: name) {
+                    Image(name)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 16)
+                } else {
+                    Image(systemName: name)
+                }
                 Text(title)
             }
         }
     }
-}
 
-@available(iOS 13.0, *)
-public struct SlidingTabView: View {
-    
-    // MARK: Internal State
-    @State private var selectionState: Int = 0 {
-        didSet {
-            selection = selectionState
+    // MARK: - SlidingTabView
+    @available(iOS 13.0, *)
+    public struct SlidingTabView: View {
+
+        // MARK: Internal State
+        @State private var selectionState: Int = 0 {
+            didSet { selection = selectionState }
         }
-    }
-    
-    // MARK: Required Properties
-    @Binding var selection: Int
-    let tabs: [TabItem]
-    
-    // MARK: View Customization Properties
-    let font: Font
-    let animation: Animation
-    let activeAccentColor: Color
-    let inactiveAccentColor: Color
-    let selectionBarColor: Color
-    let inactiveTabColor: Color
-    let activeTabColor: Color
-    let selectionBarHeight: CGFloat
-    let selectionBarBackgroundColor: Color
-    let selectionBarBackgroundHeight: CGFloat
-    let activeTextColor: Color
-    let inactiveTextColor: Color
-    
-    // MARK: Init
-    public init(
-        selection: Binding<Int>,
-        tabs: [TabItem],
-        font: Font = .body,
-        animation: Animation = .spring(),
-        activeAccentColor: Color = .blue,
-        inactiveAccentColor: Color = Color.black.opacity(0.4),
-        selectionBarColor: Color = .blue,
-        inactiveTabColor: Color = .clear,
-        activeTabColor: Color = .clear,
-        selectionBarHeight: CGFloat = 2,
-        selectionBarBackgroundColor: Color = Color.gray.opacity(0.2),
-        selectionBarBackgroundHeight: CGFloat = 1,
-        activeTextColor: Color = .blue,
-        inactiveTextColor: Color = .blue
-    ) {
-        self._selection = selection
-        self.tabs = tabs
-        self.font = font
-        self.animation = animation
-        self.activeAccentColor = activeAccentColor
-        self.inactiveAccentColor = inactiveAccentColor
-        self.selectionBarColor = selectionBarColor
-        self.inactiveTabColor = inactiveTabColor
-        self.activeTabColor = activeTabColor
-        self.selectionBarHeight = selectionBarHeight
-        self.selectionBarBackgroundColor = selectionBarBackgroundColor
-        self.selectionBarBackgroundHeight = selectionBarBackgroundHeight
-        self.activeTextColor = activeTextColor
-        self.inactiveTextColor = inactiveTextColor
-    }
-    
-    // MARK: View Construction
-    public var body: some View {
-        assert(tabs.count > 1, "Must have at least 2 tabs")
-        
-        return VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 0) {
-                ForEach(self.tabs.indices, id: \.self) { index in
-                    let tab = self.tabs[index]
-                    Button(action: {
-                        self.selectionState = index
-                    }) {
-                        HStack {
-                            Spacer()
-                            tab.label
-                                .foregroundColor(selectionState == index ? activeTextColor : inactiveTextColor)
-                                .font(font)
-                            Spacer()
+
+        // MARK: Required Properties
+        @Binding var selection: Int
+        let tabs: [TabItem]
+
+        // MARK: View Customization Properties
+        let font: Font
+        let animation: Animation
+        let activeAccentColor: Color
+        let inactiveAccentColor: Color
+        let selectionBarColor: Color
+        let inactiveTabColor: Color
+        let activeTabColor: Color
+        let selectionBarHeight: CGFloat
+        let selectionBarBackgroundColor: Color
+        let selectionBarBackgroundHeight: CGFloat
+        let activeTextColor: Color
+        let inactiveTextColor: Color
+
+        // MARK: Init
+        public init(
+            selection: Binding<Int>,
+            tabs: [TabItem],
+            font: Font = .body,
+            animation: Animation = .spring(),
+            activeAccentColor: Color = .blue,
+            inactiveAccentColor: Color = Color.black.opacity(0.4),
+            selectionBarColor: Color = .blue,
+            inactiveTabColor: Color = .clear,
+            activeTabColor: Color = .clear,
+            selectionBarHeight: CGFloat = 2,
+            selectionBarBackgroundColor: Color = Color.gray.opacity(0.2),
+            selectionBarBackgroundHeight: CGFloat = 1,
+            activeTextColor: Color = .blue,
+            inactiveTextColor: Color = .blue
+        ) {
+            self._selection = selection
+            self.tabs = tabs
+            self.font = font
+            self.animation = animation
+            self.activeAccentColor = activeAccentColor
+            self.inactiveAccentColor = inactiveAccentColor
+            self.selectionBarColor = selectionBarColor
+            self.inactiveTabColor = inactiveTabColor
+            self.activeTabColor = activeTabColor
+            self.selectionBarHeight = selectionBarHeight
+            self.selectionBarBackgroundColor = selectionBarBackgroundColor
+            self.selectionBarBackgroundHeight = selectionBarBackgroundHeight
+            self.activeTextColor = activeTextColor
+            self.inactiveTextColor = inactiveTextColor
+        }
+
+        // MARK: Body
+        public var body: some View {
+            assert(tabs.count > 1, "Must have at least 2 tabs")
+
+            return VStack(alignment: .leading, spacing: 0) {
+
+                // Tabs Row
+                HStack(spacing: 0) {
+                    ForEach(tabs.indices, id: \.self) { index in
+                        let tab = tabs[index]
+
+                        Button(action: {
+                            selectionState = index
+                        }) {
+                            HStack {
+                                Spacer()
+                                tab.label
+                                    .foregroundColor(selectionState == index ? activeTextColor : inactiveTextColor)
+                                    .font(font)
+                                Spacer()
+                            }
                         }
+                        .padding(.vertical, 16)
+                        .accentColor(isSelected(tabIdentifier: tab) ? activeAccentColor : inactiveAccentColor)
+                        .background(isSelected(tabIdentifier: tab) ? activeTabColor : inactiveTabColor)
                     }
-                    .padding(.vertical, 16)
-                    .accentColor(
-                        self.isSelected(tabIdentifier: tab)
-                            ? self.activeAccentColor
-                            : self.inactiveAccentColor)
-                    .background(
-                        self.isSelected(tabIdentifier: tab)
-                            ? self.activeTabColor
-                            : self.inactiveTabColor)
                 }
-            }
-            
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .fill(self.selectionBarColor)
-                        .frame(width: self.tabWidth(from: geometry.size.width), height: self.selectionBarHeight, alignment: .leading)
-                        .offset(x: self.selectionBarXOffset(from: geometry.size.width), y: 0)
-                        .animation(self.animation, value: selectionState)
-                    
-                    Rectangle()
-                        .fill(self.selectionBarBackgroundColor)
-                        .frame(width: geometry.size.width, height: self.selectionBarBackgroundHeight, alignment: .leading)
+
+                // Sliding Selection Bar
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+
+                        Rectangle()
+                            .fill(selectionBarColor)
+                            .frame(
+                                width: tabWidth(from: geometry.size.width),
+                                height: selectionBarHeight
+                            )
+                            .offset(x: selectionBarXOffset(from: geometry.size.width))
+                            .animation(animation, value: selectionState)
+
+                        Rectangle()
+                            .fill(selectionBarBackgroundColor)
+                            .frame(
+                                width: geometry.size.width,
+                                height: selectionBarBackgroundHeight
+                            )
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
                 .fixedSize(horizontal: false, vertical: true)
             }
-            .fixedSize(horizontal: false, vertical: true)
         }
-    }
-    
-    // MARK: Private Helpers
-    private func isSelected(tabIdentifier: TabItem) -> Bool {
-        return tabs[selectionState] == tabIdentifier
-    }
-    
-    private func selectionBarXOffset(from totalWidth: CGFloat) -> CGFloat {
-        return self.tabWidth(from: totalWidth) * CGFloat(selectionState)
-    }
-    
-    private func tabWidth(from totalWidth: CGFloat) -> CGFloat {
-        return totalWidth / CGFloat(tabs.count)
+
+        // MARK: Helpers
+        private func isSelected(tabIdentifier: TabItem) -> Bool {
+            tabs[selectionState] == tabIdentifier
+        }
+
+        private func selectionBarXOffset(from totalWidth: CGFloat) -> CGFloat {
+            tabWidth(from: totalWidth) * CGFloat(selectionState)
+        }
+
+        private func tabWidth(from totalWidth: CGFloat) -> CGFloat {
+            totalWidth / CGFloat(tabs.count)
+        }
     }
 }
 
@@ -180,10 +222,10 @@ public struct SlidingTabView: View {
 @available(iOS 13.0, *)
 struct SlidingTabConsumerView: View {
     @State private var selectedTabIndex = 0
-    
+
     var body: some View {
         VStack(alignment: .leading) {
-            SlidingTabView(
+            TabItem.SlidingTabView(
                 selection: $selectedTabIndex,
                 tabs: [
                     .text("Home"),
@@ -194,14 +236,13 @@ struct SlidingTabConsumerView: View {
                 selectionBarColor: .purple,
                 activeTextColor: .purple,
                 inactiveTextColor: .gray
-            
             )
-            
+
             (selectedTabIndex == 0 ? Text("Home View") :
                 selectedTabIndex == 1 ? Text("Star View") :
                 Text("Profile View"))
-                .padding()
-            
+            .padding()
+
             Spacer()
         }
         .padding(.top, 50)
