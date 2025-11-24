@@ -191,9 +191,10 @@ struct SlidingTabConsumerView: View {
                     .textAndImage("Profile", "person.circle")
                 ],
                 font: .body,
+                selectionBarColor: .purple,
                 activeTextColor: .purple,
-                inactiveTextColor: .gray,
-                selectionBarColor: .purple
+                inactiveTextColor: .gray
+            
             )
             
             (selectedTabIndex == 0 ? Text("Home View") :
