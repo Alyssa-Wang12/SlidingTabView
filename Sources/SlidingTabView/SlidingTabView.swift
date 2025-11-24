@@ -91,6 +91,7 @@ public struct SlidingTabView: View {
     }
 }
 
+@available(iOS 13.0, *)
 public enum TabItem: Hashable {
     case text(String)
     case systemImage(String)
