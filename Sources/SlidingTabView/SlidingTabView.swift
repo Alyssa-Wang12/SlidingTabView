@@ -82,9 +82,9 @@ public struct SlidingTabView : View {
                 tabs: [String],
                 font: Font = .body,
                 animation: Animation = .spring(),
-                activeAccentColor: Color = .blue,
+                activeAccentColor: Color = Constants.Colors.resellPurple,
                 inactiveAccentColor: Color = Color.black.opacity(0.4),
-                selectionBarColor: Color = .blue,
+                selectionBarColor: Color = Constants.Colors.resellPurple,
                 inactiveTabColor: Color = .clear,
                 activeTabColor: Color = .clear,
                 selectionBarHeight: CGFloat = 2,
@@ -175,8 +175,8 @@ struct SlidingTabConsumerView : View {
             SlidingTabView(selection: self.$selectedTabIndex,
                            tabs: ["First", "Second"],
                            font: .body,
-                           activeAccentColor: Color.blue,
-                           selectionBarColor: Color.blue)
+                           activeAccentColor: Constants.Colors.resellPurple,
+                           selectionBarColor: Constants.Colors.resellPurple)
             (selectedTabIndex == 0 ? Text("First View") : Text("Second View")).padding()
             Spacer()
         }
