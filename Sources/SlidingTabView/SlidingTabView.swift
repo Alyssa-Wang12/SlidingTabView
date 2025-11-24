@@ -25,7 +25,6 @@
 import SwiftUI
 
 @available(iOS 13.0, *)
-import SwiftUI
 
 public struct SlidingTabView: View {
     
@@ -112,6 +111,7 @@ public enum TabItem: Hashable {
         }
     }
 }
+
 
 #if DEBUG
 
