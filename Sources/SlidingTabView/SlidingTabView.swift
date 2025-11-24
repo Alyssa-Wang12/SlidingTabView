@@ -94,7 +94,9 @@ public struct SlidingTabView : View {
                 activeTabColor: Color = .clear,
                 selectionBarHeight: CGFloat = 2,
                 selectionBarBackgroundColor: Color = Color.gray.opacity(0.2),
-                selectionBarBackgroundHeight: CGFloat = 1) {
+                selectionBarBackgroundHeight: CGFloat = 1
+                activeTextColor: Color = .blue 
+                inactiveTextColor: Color = blue) {
         self._selection = selection
         self.tabs = tabs
         self.font = font
@@ -107,6 +109,8 @@ public struct SlidingTabView : View {
         self.selectionBarHeight = selectionBarHeight
         self.selectionBarBackgroundColor = selectionBarBackgroundColor
         self.selectionBarBackgroundHeight = selectionBarBackgroundHeight
+        self.activeTextcolor = activeTextColor
+        self.inactiveTextColor =  inactiveTextColor
     }
     
     // MARK: View Construction
