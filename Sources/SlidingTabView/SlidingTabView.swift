@@ -94,9 +94,9 @@ public struct SlidingTabView : View {
                 activeTabColor: Color = .clear,
                 selectionBarHeight: CGFloat = 2,
                 selectionBarBackgroundColor: Color = Color.gray.opacity(0.2),
-                selectionBarBackgroundHeight: CGFloat = 1
-                activeTextColor: Color = .blue 
-                inactiveTextColor: Color = blue) {
+                selectionBarBackgroundHeight: CGFloat = 1,
+                activeTextColor: Color = .blue,
+                inactiveTextColor: Color = .blue) {
         self._selection = selection
         self.tabs = tabs
         self.font = font
@@ -109,7 +109,7 @@ public struct SlidingTabView : View {
         self.selectionBarHeight = selectionBarHeight
         self.selectionBarBackgroundColor = selectionBarBackgroundColor
         self.selectionBarBackgroundHeight = selectionBarBackgroundHeight
-        self.activeTextcolor = activeTextColor
+        self.activeTextColor = activeTextColor
         self.inactiveTextColor =  inactiveTextColor
     }
     
@@ -120,30 +120,31 @@ public struct SlidingTabView : View {
         
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 0) {
-                ForEach(self.tabs, id:\.self) { tab in
+                ForEach(self.tabs.indices, id: \.self) { index in
+                    let tab = self.tabs[index]
                     Button(action: {
-                        let selection = self.tabs.firstIndex(of: tab) ?? 0
-                        self.selectionState = selection
+                        self.selectionState = index
                     }) {
                         HStack {
                             Spacer()
-                            Text(tab).font(self.font)
-                                .foregroundColor(selection == index ? activeTextColor : inactiveTextColor)
+                            Text(tab)
+                                .foregroundColor(selectionState == index ? activeTextColor : inactiveTextColor)
                                 .font(font)
                             Spacer()
                         }
                     }
                     .padding(.vertical, 16)
-                        .accentColor(
-                            self.isSelected(tabIdentifier: tab)
-                                ? self.activeAccentColor
-                                : self.inactiveAccentColor)
-                        .background(
-                            self.isSelected(tabIdentifier: tab)
-                                ? self.activeTabColor
-                                : self.inactiveTabColor)
+                    .accentColor(
+                        self.isSelected(tabIdentifier: tab)
+                            ? self.activeAccentColor
+                            : self.inactiveAccentColor)
+                    .background(
+                        self.isSelected(tabIdentifier: tab)
+                            ? self.activeTabColor
+                            : self.inactiveTabColor)
                 }
             }
+
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
